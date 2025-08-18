@@ -58,24 +58,6 @@ const categorizeTech = (tech) => {
 const Projects = () => {
   const projects = [
     {
-      title: "Respoon",
-      description:
-        "A community platform that connects surplus-food donors (restaurants, events, individuals) with nearby recipients. Includes request matching, pickup scheduling, basic verification, and real-time status updates.",
-      techStack: [
-        "React",
-        "Tailwind",
-        "Flask",
-        "Socket.io",
-        "SQLAlchemy",
-        "PostgreSQL",
-        "Redis",
-        "JWT",
-        "Cloud Run",
-      ],
-      liveLink: "https://demo-ecommerce.com",
-      githubLink: "https://github.com/username/ecommerce",
-    },
-    {
       title: "Wordley AI",
       description:
         "Wordley.ai is an AI tool that breaks down any chunk of text into structured insights using modern NLP techniques and open-source LLMs. It performs full-stack language analysis from tone, sentiment, and emotion detection to classification, summarization, and entity recognition.",
@@ -129,6 +111,24 @@ const Projects = () => {
       ],
       liveLink: "https://recallerai.netlify.app",
       githubLink: "https://github.com/Hassanshahzad-x/recall",
+    },
+    {
+      title: "Respoon",
+      description:
+        "A community platform that connects surplus-food donors (restaurants, events, individuals) with nearby recipients. Includes request matching, pickup scheduling, basic verification, and real-time status updates.",
+      techStack: [
+        "React",
+        "Tailwind",
+        "Flask",
+        "Socket.io",
+        "SQLAlchemy",
+        "PostgreSQL",
+        "Redis",
+        "JWT",
+        "Cloud Run",
+      ],
+      liveLink: "https://respoon.netlify.app/",
+      githubLink: "https://github.com/Hassanshahzad-x/respoon",
     },
   ];
 
