@@ -1,10 +1,16 @@
-# Next.js on Netlify: overrides the old Vite settings (publish "dist") from the previous site.
+# Static export of the Next.js site. Overrides the old Vite settings (publish "dist") from the previous site.
 [build]
   command = "npm run build"
-  publish = ".next"
+  publish = "out"
 
 # The previous site served the résumé here; keep old links working.
 [[redirects]]
   from = "/resume.pdf"
   to = "/hassan-shahzad-resume.pdf"
   status = 301
+
+# The exported Open Graph image has no file extension.
+[[headers]]
+  for = "/opengraph-image"
+  [headers.values]
+    Content-Type = "image/png"
