@@ -1,0 +1,10 @@
+# Next.js on Netlify: overrides the old Vite settings (publish "dist") from the previous site.
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+# The previous site served the résumé here; keep old links working.
+[[redirects]]
+  from = "/resume.pdf"
+  to = "/hassan-shahzad-resume.pdf"
+  status = 301

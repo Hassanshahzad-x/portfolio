@@ -1,0 +1,286 @@
+@import "tailwindcss";
+
+/* dark: = pinned dark, or OS dark with nothing pinned. */
+@custom-variant dark {
+  &:where([data-theme="dark"], [data-theme="dark"] *) {
+    @slot;
+  }
+  @media (prefers-color-scheme: dark) {
+    &:where(:root:not([data-theme="light"]) *) {
+      @slot;
+    }
+  }
+}
+
+/* ---------- Design tokens ---------- */
+
+:root {
+  color-scheme: light dark;
+
+  /* Neutral, cool off-white / off-black with one signal accent. light-dark() picks by color-scheme. */
+  --bg: light-dark(#f4f4f3, #0d0e10);
+  --surface: light-dark(#ebebe9, #15161a);
+  --raised: light-dark(#fbfbfa, #1b1d21);
+  --fg: light-dark(#121315, #ecece8);
+  --fg-2: light-dark(#46484e, #a9abb1);
+  --fg-3: light-dark(#5d5f65, #85878e);
+  --line: light-dark(#d6d6d2, #26282d);
+  --line-strong: light-dark(#b9b9b4, #3a3d43);
+  --accent: light-dark(#ff4f1a, #ff5f2e);
+  --accent-ink: light-dark(#b8360c, #ff8457);
+  --success: light-dark(#1f7a4d, #4cc38a);
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --dur-fast: 160ms;
+  --dur-med: 280ms;
+  --dur-slow: 700ms;
+
+  /* Layout */
+  --gutter: clamp(1rem, 0.4rem + 2.6vw, 2.5rem);
+  --section: clamp(5rem, 3rem + 8vw, 10rem);
+  --nav-h: 64px;
+}
+
+/* The toggle pins a theme; without one, color-scheme follows the OS. */
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-raised: var(--raised);
+  --color-fg: var(--fg);
+  --color-fg-2: var(--fg-2);
+  --color-fg-3: var(--fg-3);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-success: var(--success);
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  /* Type scale */
+  --text-display: clamp(2.75rem, 1.2rem + 5.6vw, 6.25rem);
+  --text-display--line-height: 0.94;
+  --text-display--letter-spacing: -0.045em;
+  --text-h2: clamp(2.125rem, 1.3rem + 3.2vw, 4.25rem);
+  --text-h2--line-height: 1;
+  --text-h2--letter-spacing: -0.04em;
+  --text-h3: clamp(1.5rem, 1.15rem + 1.3vw, 2.25rem);
+  --text-h3--line-height: 1.08;
+  --text-h3--letter-spacing: -0.03em;
+  --text-lead: clamp(1.125rem, 1rem + 0.5vw, 1.375rem);
+  --text-lead--line-height: 1.45;
+  --text-meta: 0.8125rem;
+  --text-meta--line-height: 1.4;
+
+  --ease-out: var(--ease-out);
+}
+
+/* ---------- Base ---------- */
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: calc(var(--nav-h) + 1rem);
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  text-rendering: optimizeLegibility;
+  -webkit-tap-highlight-color: transparent;
+}
+
+::selection {
+  background: var(--accent);
+  color: #0d0e10;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+/* Homepage: each scroll lands on the next section or project slide. Sections taller than the
+   screen still scroll freely inside. Phones keep normal scrolling. */
+@media (min-width: 768px) {
+  :root:has(#work) {
+    scroll-snap-type: y mandatory;
+    scroll-padding-top: var(--nav-h);
+  }
+}
+
+/* ---------- Layout primitives ---------- */
+
+@utility shell {
+  width: 100%;
+  max-width: 1360px;
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+@utility section-y {
+  padding-block: var(--section);
+}
+
+@utility meta {
+  font-family: var(--font-mono);
+  font-size: var(--text-meta);
+  line-height: var(--text-meta--line-height);
+  letter-spacing: 0.01em;
+  color: var(--fg-3);
+}
+
+/* Underline that draws in from the left on hover. */
+@utility link-draw {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-size: 0% 1px;
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  transition: background-size var(--dur-med) var(--ease-out);
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      background-size: 100% 1px;
+    }
+  }
+  &:focus-visible {
+    background-size: 100% 1px;
+  }
+}
+
+@utility press {
+  transition:
+    transform var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) ease,
+    color var(--dur-fast) ease,
+    border-color var(--dur-fast) ease;
+  &:active {
+    transform: scale(0.97);
+  }
+}
+
+/* ---------- Motion ---------- */
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Hero load-in, staggered by --i. Runs once, never blocks interaction. */
+  .enter {
+    animation: rise var(--dur-slow) var(--ease-out) both;
+    animation-delay: calc(var(--i, 0) * 70ms + 60ms);
+  }
+
+  /* Scroll reveals use the native scroll timeline where supported. Elsewhere content is simply visible. */
+  @supports (animation-timeline: view()) {
+    .reveal {
+      animation: rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 22%;
+    }
+  }
+
+  /* Nav gains its backdrop once the page scrolls. */
+  @supports (animation-timeline: scroll()) {
+    .nav-surface {
+      animation: nav-solid linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 120px;
+    }
+  }
+}
+
+@keyframes nav-solid {
+  from {
+    background-color: transparent;
+    border-color: transparent;
+  }
+  to {
+    background-color: color-mix(in oklab, var(--bg) 82%, transparent);
+    border-color: var(--line);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .enter {
+    animation: fade 200ms ease both;
+  }
+}
+
+/* Fallback when the scroll timeline is unsupported or motion is reduced: nav is always solid. */
+@supports not (animation-timeline: scroll()) {
+  .nav-surface {
+    background-color: color-mix(in oklab, var(--bg) 88%, transparent);
+    border-color: var(--line);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nav-surface {
+    background-color: color-mix(in oklab, var(--bg) 88%, transparent);
+    border-color: var(--line);
+  }
+}
+
+/* ---------- Signal trace (hero) ---------- */
+
+.trace-stage {
+  --lit: 0;
+  transition:
+    background-color var(--dur-med) ease,
+    color var(--dur-med) ease;
+}
+.trace-stage[data-lit="true"] {
+  --lit: 1;
+}
+.trace-node {
+  transition:
+    background-color var(--dur-med) ease,
+    border-color var(--dur-med) ease,
+    transform var(--dur-med) var(--ease-out);
+}
+.trace-stage[data-lit="true"] .trace-node {
+  background-color: var(--accent);
+  border-color: var(--accent);
+}
+.trace-stage[data-active="true"] .trace-node {
+  transform: scale(1.35);
+}
+.trace-rail-fill {
+  transform-origin: top;
+  transition: transform 420ms var(--ease-out);
+}
