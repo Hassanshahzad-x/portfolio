@@ -430,20 +430,68 @@ export const capabilities = [
   },
 ] as const;
 
-export const experience = [
+// Roles and bullets verbatim from the resume. Do not summarize.
+export type Role = {
+  company: string;
+  url: string;
+  logo: string;
+  role: string;
+  period: string;
+  type: string;
+  about?: string;
+  groups: { title?: string; slug?: string; bullets: string[] }[];
+};
+
+export const experience: Role[] = [
   {
     company: "Softpers",
     url: "https://softpers.com/",
     logo: "/logos/softpers.svg",
-    role: "Software Engineer, Forward Deployed Engineer",
+    role: "Software Engineer | Forward Deployed Engineer",
     period: "Sep 2025 - Present",
     type: "Full-time",
-    summary:
-      "Embedded with client teams to architect and ship SaaS platforms: Outersuite, Vynsite, Voyajur and Hilo ATOS.",
-    impact: [
-      "Replaced a paid Nearmap AI dependency with a zero-cost OSM and LiDAR pipeline",
-      "4 Claude features in production on Outersuite",
-      "Stripe Connect, AWS S3, SendGrid, Google Calendar and FAA data on Hilo ATOS",
+    groups: [
+      {
+        title: "Outersuite: Construction Proposals & Cost Estimation",
+        slug: "outersuite",
+        bullets: [
+          "Built a full-stack SaaS platform using TypeScript, React, FastAPI, and PostgreSQL for commercial exterior-services workflows, integrating Salesforce, aerial imagery, property measurement, cost estimation, bid generation, and subcontractor RFIs.",
+          "Integrated 7 external systems, including Salesforce, Nearmap, Monday, Google Drive, RSMeans, and OpenStreetMap.",
+          "Replaced a paid Nearmap AI dependency with a zero-cost geospatial pipeline using OSM building footprints and USGS 3DEP LiDAR for automated building tracing and height extraction, then built interactive takeoff workflows on top of it using TypeScript, Leaflet, OpenLayers, TanStack Query, and Zustand.",
+          "Built 4 production Claude-powered features, including an SSE-streaming assistant, PDF-to-JSON parser, AI bid summaries, and batched cost classification.",
+          "Engineered a deterministic FastAPI cost engine using Decimal arithmetic with reconciliation across labor, fees, freight, markup, and tax, and added Sentry-based error monitoring for production reliability.",
+        ],
+      },
+      {
+        title: "Vynsite: Automotive Dealership & Customer Engagement",
+        slug: "vynsite",
+        bullets: [
+          "Architected a multi-tenant automotive SaaS platform using NestJS, TypeScript, PostgreSQL, and Prisma for dealership operations, loyalty, referrals, inventory, and lead management.",
+          "Designed a domain-driven backend with RBAC, 2FA, audit logging, and secure multi-tenant access controls.",
+          "Built AI-powered customer insights and vehicle recommendations using the OpenAI API.",
+          "Integrated inventory, VIN decoding, fuel economy, and geolocation providers.",
+        ],
+      },
+      {
+        title: "Voyajur: Vacation Rental & Property Management",
+        slug: "voyajur",
+        bullets: [
+          "Architected a booking and property management platform using Next.js, Express, GraphQL, PostgreSQL, and Prisma.",
+          "Designed a reservation domain covering bookings, payments, messaging, reviews, PMS integrations, and operations.",
+          "Implemented JWT authentication, RBAC, and real-time authorization.",
+          "Built Stripe payment processing with webhooks, refunds, and reconciliation.",
+          "Engineered Redis-backed queues, real-time communication, and channel-manager integrations for Smily, Guesty, Hostaway, and iCal.",
+        ],
+      },
+      {
+        title: "Hilo ATOS: Aviation Training & Operations Platform",
+        slug: "hilo-atos",
+        bullets: [
+          "Architected a multi-tenant aviation training and operations platform using Next.js, TypeScript, and PostgreSQL, with a portable backend that runs in both serverless and traditional environments.",
+          "Integrated Stripe Connect, AWS S3, SendGrid, Google Calendar, and FAA data sources.",
+          "Delivered AI-powered scheduling and document assistance using Anthropic Claude.",
+        ],
+      },
     ],
   },
   {
@@ -453,26 +501,45 @@ export const experience = [
     role: "Founding Software Engineer",
     period: "Oct 2025 - May 2026",
     type: "Contract",
-    summary: "Built the AI persona platform as its founding engineer: app, RAG service, voice and billing.",
-    impact: [
-      "−65% voice latency and −45% TTS cost",
-      "Docker image cut from 8.2 GB to 3.7 GB",
-      "Persona onboarding from 6 hours to under 90 minutes",
+    about:
+      "Folklore (formerly Echotree) is an AI-powered memory and legacy platform that turns a person's stories, voice, and personality into an interactive digital Heirloom that loved ones can talk to and learn from.",
+    groups: [
+      {
+        bullets: [
+          "Architected and built a production AI platform that converts interview transcripts into voice-enabled conversational personas, serving 20+ active users, supporting 5+ client families, and powering 60+ live AI personas.",
+          "Led full-stack development using Next.js 15, TypeScript, Supabase, and PostgreSQL, owning architecture, authentication, conversations, voice experiences, administration workflows, and billing systems.",
+          "Solely architected and developed a standalone FastAPI-based RAG microservice using Qdrant, SentenceTransformers, and Google Gemini API, reducing hallucinations by 70% compared to general-purpose AI responses.",
+          "Implemented real-time conversational and voice experiences using speech-to-text, ElevenLabs TTS, and encrypted audio caching (AES-256-GCM), reducing voice response latency by 65% and lowering TTS infrastructure costs by 45%.",
+          "Integrated Stripe subscriptions, billing portal workflows, and a metered token quota system, supporting $7K+ annual recurring revenue across 4 subscription tiers with automated webhook processing and usage tracking.",
+          "Containerized and deployed AI services using Docker and Railway, reducing image size from 8.2 GB to 3.7 GB, with health monitoring, structured logging, auto-recovery, and observability through Sentry and PostHog.",
+          "Built a multi-step persona creation pipeline including transcript processing, AI-generated stress-test questions, retrieval indexing, voice configuration, and activation workflows, reducing persona QA and onboarding time from 6 hours to under 90 minutes.",
+          "Engineered high-performance RAG inference pipelines with semantic retrieval, intelligent chunking, cosine similarity, MMR re-ranking, and persona-aware prompt orchestration with Google Gemini, achieving <120ms retrieval latency, 40% faster time-to-first-token, and 150+ concurrent requests per instance.",
+        ],
+      },
     ],
   },
   {
     company: "Arrivy",
     url: "https://www.arrivy.com/",
     logo: "/logos/arrivy.png",
-    role: "Software Development Engineer I",
+    role: "Software Development Engineer - I",
     period: "Feb 2025 - Aug 2025",
     type: "Full-time",
-    summary:
-      "Python and Node microservices for a field-service platform, plus Cloud Functions and Pub/Sub pipelines for real-time crew attendance.",
-    impact: [
-      "−60% user-facing latency on PDF processing with Redis queues and caching",
-      "−80% PDF size with a Puppeteer and Ghostscript pipeline",
-      "HubSpot, Workday and Easybook integrations",
+    about:
+      "Arrivy is a field service coordination platform that streamlines customer communication, crew management, and operational logistics in real time.",
+    groups: [
+      {
+        bullets: [
+          "Built and maintained Python and Node microservices for PDF handling and database tasks, improving modularity and deployment speed.",
+          "Developed and deployed Google Cloud Functions and Pub/Sub pipelines to enable real-time crew attendance tracking, logging schedules, and work hours with high reliability and a scalable architecture.",
+          "Built an internal authorization tool (React + Flask) for account access management, improving auditing and traceability.",
+          "Leveraged Redis queues to run background tasks asynchronously, implementing caching to cut user-facing latency by over 60% during PDF processing.",
+          "Implemented dynamic PDF generation and compression pipelines using puppeteer and ghostscript4js libraries, optimizing the process and reducing PDF sizes by 80% without loss in quality.",
+          "Designed and implemented a React and Flask based template system for task creation, optimizing workflows by auto-copying files attached to templates to tasks on selection, accelerating workflows, and reducing manual effort.",
+          "Implemented a secure DB authentication system using sandboxed service accounts to access production data via SQLAlchemy ORM.",
+          "Integrated third-party APIs (HubSpot, Workday, Easybook) using a Node and Python based backend for real-time data sync and workflow automation.",
+        ],
+      },
     ],
   },
   {
@@ -482,11 +549,14 @@ export const experience = [
     role: "Technical Content Engineer",
     period: "Jul 2023 - Jan 2025",
     type: "Full-time",
-    summary:
-      "React and Node.js courses and projects, AI mock interviewers, and LLM mentorship inside coding widgets.",
-    impact: [
-      "Docker browser environments for thousands of concurrent learners",
-      "+25% engagement from GenAI mentorship in coding widgets",
+    groups: [
+      {
+        bullets: [
+          "Curated React and Node.js technical content and hands-on projects covering REST APIs, databases, authentication, and production deployment, improving learner engagement and course completion.",
+          "Contributed to AI mock interviewers through prompt engineering, model testing, and feedback optimization across multiple ML models.",
+          "Integrated Generative AI and LLMs into coding widgets for real-time mentorship, while building Docker-based browser environments for thousands of concurrent users, increasing engagement by 25%.",
+        ],
+      },
     ],
   },
-] as const;
+];

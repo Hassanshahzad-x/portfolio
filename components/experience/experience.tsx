@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { ArrowUpRight } from "@phosphor-icons/react/ssr";
 import { experience } from "@/lib/content";
 
@@ -62,15 +63,30 @@ export function Experience() {
                   </a>
                 </div>
 
-                <p className="mt-5 max-w-[62ch] text-fg-2">{e.summary}</p>
-                <ul className="mt-5 space-y-2.5">
-                  {e.impact.map((line) => (
-                    <li key={line} className="grid max-w-[62ch] grid-cols-[10px_1fr] gap-3 text-[0.9375rem]">
-                      <span aria-hidden className="mt-[0.7em] h-px w-2.5 bg-accent" />
-                      {line}
-                    </li>
-                  ))}
-                </ul>
+                {e.about && <p className="mt-5 max-w-[68ch] text-fg-2">{e.about}</p>}
+                {e.groups.map((g) => (
+                  <div key={g.title ?? e.company} className="mt-7">
+                    {g.title && (
+                      <h4 className="font-semibold tracking-tight">
+                        {g.slug ? (
+                          <Link href={`/work/${g.slug}`} className="link-draw">
+                            {g.title}
+                          </Link>
+                        ) : (
+                          g.title
+                        )}
+                      </h4>
+                    )}
+                    <ul className={`space-y-3 ${g.title ? "mt-3" : ""}`}>
+                      {g.bullets.map((line) => (
+                        <li key={line} className="grid max-w-[72ch] grid-cols-[10px_1fr] gap-3 text-[0.9375rem] text-fg-2">
+                          <span aria-hidden className="mt-[0.75em] h-px w-2.5 bg-accent" />
+                          {line}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
               </div>
             </li>
           ))}
