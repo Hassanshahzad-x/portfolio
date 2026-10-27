@@ -7,6 +7,9 @@ const nextConfig: NextConfig = {
   trailingSlash: true,
   // The default image optimizer needs a server; screenshots are already sized.
   images: { unoptimized: true },
+  experimental: {
+    agentUpgrade: "security",
+  },
   turbopack: {
     rules: {
       "*.css": {
