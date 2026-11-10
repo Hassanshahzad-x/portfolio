@@ -1,0 +1,616 @@
+import type { Workflow } from "./types";
+
+// How each project works, as data. Facts and technology come only from lib/content.ts (resume and codebases):
+// a technology is listed on a node only where it runs, and left off when that can't be said with confidence.
+
+const folklore: Workflow = {
+  slug: "folklore",
+  label: "A grandparent's interview becomes a private memory vault and a voice clone. When family ask a question, AI finds the answer in that vault and replies in the grandparent's own voice.",
+  cols: 5,
+  rows: 2,
+  nodes: [
+    {
+      id: "elder", title: "Grandparent", art: "elder", hue: "peach", col: 0, row: 0,
+      purpose: "The person whose stories the family wants to keep.",
+      how: "They sit for one guided interview, 60 to 90 minutes, telling their own stories in their own words.",
+      tech: [],
+      output: "Their stories and voice, on tape.",
+    },
+    {
+      id: "interview", title: "Interview", art: "interview", hue: "coral", col: 1, row: 0, step: 1,
+      purpose: "Turns one recorded conversation into material an Heirloom can be built from.",
+      how: "In a guided creation workflow, the transcript is cleaned and organized by speaker before anything is indexed.",
+      tech: ["Next.js 15 admin wizard", "Supabase"],
+      output: "A clean transcript for the vault, and audio for the voice clone.",
+    },
+    {
+      id: "vault", title: "Memory vault", art: "vault", hue: "lavender", col: 2, row: 0, step: 2,
+      purpose: "A private archive of that person's own words, searchable just by asking.",
+      how: "Passages are turned into embeddings and stored in a memory store of their own, one collection per person.",
+      tech: ["FastAPI RAG service", "SentenceTransformers", "Qdrant"],
+      output: "Passages the AI can look up by meaning.",
+    },
+    {
+      id: "ai", title: "AI finds the answer", art: "recall", hue: "blue", col: 3, row: 0,
+      purpose: "Answers a new question only from what the person actually said.",
+      how: "The question retrieves their own passages, re-ranked, with weak matches filtered out. With nothing to stand on, it answers with uncertainty rather than invented history.",
+      tech: ["Qdrant retrieval", "MMR re-ranking", "Gemini 2.5 Flash"],
+      output: "A grounded answer in text.",
+    },
+    {
+      id: "family", title: "Family asks", art: "ask", hue: "mint", col: 4, row: 0, step: 3,
+      purpose: "Invited relatives ask questions, typed or spoken.",
+      how: "Family join by email invite as viewers or admins. The database enforces who can open each Heirloom.",
+      tech: ["Next.js 15", "Speech input", "Supabase auth + RLS"],
+      output: "A question for the AI.",
+    },
+    {
+      id: "clone", title: "Voice clone", art: "clone", hue: "coral", col: 1, row: 1,
+      purpose: "Lets answers be heard in the person's own voice.",
+      how: "A professional voice clone is made from the interview audio.",
+      tech: ["ElevenLabs voice clone"],
+      output: "A voice the answers can be spoken in.",
+    },
+    {
+      id: "voice", title: "Their voice", art: "voice", hue: "cyan", col: 3, row: 1,
+      purpose: "Plays the answer back in the cloned voice.",
+      how: "Answers are spoken with the clone. Audio is cached encrypted, so a replayed answer comes back instantly. Paid voice plans meter usage.",
+      tech: ["ElevenLabs TTS", "AES-256-GCM audio cache", "Stripe voice plans"],
+      output: "A spoken answer for the family.",
+    },
+  ],
+  links: [
+    ["elder", "interview"],
+    ["interview", "vault"],
+    ["vault", "ai"],
+    ["family", "ai"],
+    ["interview", "clone"],
+    ["clone", "voice"],
+    ["ai", "voice"],
+    ["voice", "family", "xy"],
+  ],
+  steps: [
+    { title: "Record", text: "A loved one sits for one guided interview, 60 to 90 minutes of their own stories." },
+    { title: "Keep", text: "Their words become a private archive the family can search just by asking." },
+    { title: "Ask", text: "Relatives ask questions and hear answers in that person's cloned voice, drawn only from what they said." },
+  ],
+};
+
+const outersuite: Workflow = {
+  slug: "outersuite",
+  label: "A contractor's drawings are measured and the property is mapped, both flow into a priced estimate, an estimator checks it, and a proposal goes out.",
+  cols: 5,
+  rows: 2,
+  nodes: [
+    {
+      id: "contractor", title: "Contractor", art: "contractor", hue: "peach", col: 0, row: 0,
+      purpose: "A contractor bidding multifamily work, starting from an approved request for proposal.",
+      how: "The opportunity lives in one record from first call to proposal, kept in two-way sync with the sales system.",
+      tech: ["Salesforce, two-way"],
+      output: "A bid to price: the plan set and the property address.",
+    },
+    {
+      id: "drawings", title: "Drawings", art: "blueprints", hue: "blue", col: 1, row: 0, step: 1,
+      purpose: "The construction plan set for the bid. On one real job, 34 sheets.",
+      how: "The selected plan sets are uploaded and shown with the real drawing under the line work.",
+      tech: ["React", "pdf.js"],
+      output: "Sheets for the plan reader.",
+    },
+    {
+      id: "measure", title: "Auto-measure", art: "measure", hue: "lavender", col: 2, row: 0, step: 2,
+      purpose: "Measures rooms and counts fixtures, and shows where every number came from.",
+      how: "Rules read the drawing's exact geometry, with no AI model: rooms, walls, finish tags, schedules, hatched areas. Box one fixture and every copy on the set is found.",
+      tech: ["FastAPI plan reader", "Symbol search"],
+      output: "Quantities, each classed as Measured, Derived, Scheduled, Assumed or Needs Estimator.",
+    },
+    {
+      id: "property", title: "Property map", art: "property", hue: "mint", col: 2, row: 1,
+      purpose: "Measures the buildings before anyone visits the site.",
+      how: "Outlines come from mapping data and aerial imagery, heights and roof pitch from public LiDAR, and parcel lines from Regrid. Balconies and corridors are read from imagery with AI, repeated and voted.",
+      tech: ["Leaflet", "USGS LiDAR", "Regrid", "Claude (imagery)"],
+      output: "Proposed exterior quantities.",
+    },
+    {
+      id: "estimate", title: "Estimate", art: "estimate", hue: "cyan", col: 3, row: 0,
+      purpose: "Prices the measured quantities.",
+      how: "Quantities flow into scope groups and are priced with the contractor's own cost formulas and assembly library. Unusual rates are flagged.",
+      tech: ["FastAPI cost engine (Decimal)", "PostgreSQL"],
+      output: "A priced breakout, every line traceable.",
+    },
+    {
+      id: "estimator", title: "Estimator signs off", art: "estimator", hue: "peach", col: 4, row: 0, step: 3,
+      purpose: "Keeps every pricing decision with a person.",
+      how: "The estimator confirms, corrects or strikes each proposed quantity, focusing on the uncertain lines. Corrections keep the original figure and survive a re-read.",
+      tech: ["React review UI"],
+      output: "An approved estimate.",
+    },
+    {
+      id: "proposal", title: "Proposal", art: "proposal", hue: "coral", col: 4, row: 1,
+      purpose: "A client-ready proposal, rendered from the estimate.",
+      how: "The proposal is built from the same record in the company's own layout. Scope and bid summaries can be drafted with AI, then edited.",
+      tech: ["Print or PDF", "Claude (bid summaries)"],
+      output: "A proposal the contractor sends.",
+    },
+  ],
+  links: [
+    ["contractor", "drawings"],
+    ["drawings", "measure"],
+    ["measure", "estimate"],
+    ["contractor", "property", "yx"],
+    ["property", "estimate", "xy"],
+    ["estimate", "estimator"],
+    ["estimator", "proposal"],
+  ],
+  steps: [
+    { title: "Upload the drawings", text: "A contractor drops in the plan set for a bid. On a real job that was 34 sheets." },
+    { title: "Measured for you", text: "The system measures rooms and counts fixtures, and shows where every number came from." },
+    { title: "Estimator signs off", text: "The estimator checks only the uncertain lines, then sends a priced proposal." },
+  ],
+};
+
+const voyajur: Workflow = {
+  slug: "voyajur",
+  label: "Bookings from four channel managers pass through a queue into one reservation calendar. Guests pay through Stripe, and hosts run everything from one app.",
+  cols: 4,
+  rows: 2,
+  nodes: [
+    {
+      id: "channels", title: "Booking channels", art: "channels", hue: "blue", col: 0, row: 0, step: 1,
+      purpose: "Hosts list the same property on several channels.",
+      how: "Bookings arrive from four channel managers at once.",
+      tech: ["Smily", "Guesty", "Hostaway", "iCal"],
+      output: "Incoming bookings and updates.",
+    },
+    {
+      id: "queue", title: "Queue", art: "queue", hue: "neutral", col: 1, row: 0,
+      purpose: "Keeps every channel consistent without dropping an update.",
+      how: "Channel-manager integrations run through Redis-backed queues, which keep the external channels in sync.",
+      tech: ["Redis-backed queues"],
+      output: "Bookings, in order, for the reservation system.",
+    },
+    {
+      id: "calendar", title: "One calendar", art: "calendar", hue: "lavender", col: 2, row: 0, step: 2,
+      purpose: "Every booking lands in one reservation system, so all channels stay in step.",
+      how: "A reservation domain owns bookings, payments, messaging, reviews and operations, behind a GraphQL API.",
+      tech: ["GraphQL on Express", "PostgreSQL + Prisma"],
+      output: "One source of truth for availability.",
+    },
+    {
+      id: "host", title: "Host", art: "host", hue: "peach", col: 3, row: 0,
+      purpose: "Hosts manage bookings, guests and messages in one place.",
+      how: "Sign-in and roles decide who sees what, and updates arrive in real time.",
+      tech: ["Next.js host app", "JWT auth + RBAC", "Real-time communication"],
+    },
+    {
+      id: "guest", title: "Guest", art: "guest", hue: "mint", col: 1, row: 1,
+      purpose: "A traveller books a stay.",
+      how: "Guests book and pay in the same app hosts use.",
+      tech: ["Next.js guest app"],
+      output: "A booking and a payment.",
+    },
+    {
+      id: "pay", title: "Payments", art: "payment", hue: "cyan", col: 2, row: 1, step: 3,
+      purpose: "Card payments and refunds you can audit.",
+      how: "Payments run through Stripe. Webhooks update the booking, and refunds and reconciliation sit in the same domain as bookings.",
+      tech: ["Stripe", "Webhooks", "Refunds + reconciliation"],
+      output: "A paid, reconciled booking.",
+    },
+  ],
+  links: [
+    ["channels", "queue"],
+    ["queue", "calendar"],
+    ["calendar", "host"],
+    ["guest", "pay"],
+    ["pay", "calendar"],
+  ],
+  steps: [
+    { title: "Bookings come in", text: "Hosts list on several channels. Bookings arrive from four channel managers at once." },
+    { title: "One calendar", text: "Every booking lands in one reservation system, so all channels stay in step." },
+    { title: "Guests pay", text: "Card payments and refunds are handled and reconciled through Stripe." },
+  ],
+};
+
+const vynsite: Workflow = {
+  slug: "vynsite",
+  label: "Each dealership has its own space; an access check guards a shared platform that holds cars and leads, enriched by data providers and AI car recommendations.",
+  cols: 5,
+  rows: 2,
+  nodes: [
+    {
+      id: "a", title: "Dealer A", art: "dealerA", hue: "blue", col: 0, row: 0, step: 1,
+      purpose: "Each dealership works in its own space.",
+      how: "Many dealerships share one platform, and none can see another's customers.",
+      tech: ["Tenant isolation"],
+      output: "Requests scoped to one dealership.",
+    },
+    {
+      id: "b", title: "Dealer B", art: "dealerB", hue: "coral", col: 0, row: 1,
+      purpose: "A second dealership on the same platform.",
+      how: "Same software, separate data: Dealer B's customers are invisible to Dealer A.",
+      tech: ["Tenant isolation"],
+      output: "Requests scoped to one dealership.",
+    },
+    {
+      id: "access", title: "Access check", art: "shield", hue: "lavender", col: 1, row: 0.5, step: 2,
+      purpose: "Decides who can open what.",
+      how: "Roles, two-factor sign-in and an audit trail of every sensitive action.",
+      tech: ["RBAC", "2FA", "Audit logging"],
+      output: "Only allowed requests reach the platform.",
+    },
+    {
+      id: "platform", title: "Shared platform", art: "platform", hue: "neutral", col: 2, row: 0.5,
+      purpose: "One backend for every dealership.",
+      how: "A domain-driven backend with separate modules for operations, loyalty, referrals, inventory and leads.",
+      tech: ["NestJS", "PostgreSQL + Prisma"],
+      output: "Dealership data, kept apart per tenant.",
+    },
+    {
+      id: "cars", title: "Cars + leads", art: "cars", hue: "peach", col: 3, row: 0, step: 3,
+      purpose: "Inventory, leads, loyalty and referrals in one place.",
+      how: "Vehicles and customer leads are managed side by side, enriched with provider data.",
+      tech: ["Inventory", "Leads", "Loyalty + referrals"],
+      output: "Cars and customers to match.",
+    },
+    {
+      id: "providers", title: "Data providers", art: "providers", hue: "cyan", col: 4, row: 0,
+      purpose: "Fills in vehicle and location details automatically.",
+      how: "External providers supply inventory, decode VINs, add fuel economy and resolve locations.",
+      tech: ["Inventory feed", "VIN decoding", "Fuel economy", "Geolocation"],
+      output: "Richer vehicle records.",
+    },
+    {
+      id: "ai", title: "AI car picks", art: "carPicks", hue: "mint", col: 3, row: 1,
+      purpose: "Suggests cars for each customer.",
+      how: "AI turns customer data into insights and vehicle recommendations.",
+      tech: ["OpenAI API"],
+      output: "Recommended cars per customer.",
+    },
+  ],
+  links: [
+    ["a", "access"],
+    ["b", "access"],
+    ["access", "platform"],
+    ["platform", "cars"],
+    ["platform", "ai"],
+    ["providers", "cars"],
+    ["cars", "ai"],
+  ],
+  steps: [
+    { title: "A space per dealer", text: "Many dealerships share one platform, and none can see another's customers." },
+    { title: "Keys under control", text: "Roles, two-factor sign-in and an audit trail decide who can open what." },
+    { title: "Cars and leads", text: "Inventory, leads, loyalty and referrals in one place, with AI suggesting cars for each customer." },
+  ],
+};
+
+const hiloAtos: Workflow = {
+  slug: "hilo-atos",
+  label: "Flight schools run on one platform. Claude helps build the schedule, which syncs to email and calendars, and helps with records that sit beside FAA data and Stripe Connect payments.",
+  cols: 4,
+  rows: 3,
+  nodes: [
+    {
+      id: "schools", title: "Flight schools", art: "hangar", hue: "blue", col: 0, row: 1, step: 1,
+      purpose: "Several training organizations run their day-to-day on one platform.",
+      how: "Each organization is a tenant with its own data.",
+      tech: ["Next.js + TypeScript", "Multi-tenant"],
+      output: "Lessons, people and aircraft to plan.",
+    },
+    {
+      id: "platform", title: "One platform", art: "portable", hue: "neutral", col: 1, row: 1,
+      purpose: "The shared backend every school runs on.",
+      how: "A portable backend: the same code runs in serverless and traditional hosting.",
+      tech: ["Portable backend", "PostgreSQL"],
+      output: "Requests for scheduling, records and payments.",
+    },
+    {
+      id: "ai", title: "AI scheduler", art: "schedule", hue: "lavender", col: 2, row: 0, step: 2,
+      purpose: "The schedule fills itself.",
+      how: "Claude helps build the training schedule.",
+      tech: ["Claude"],
+      output: "A proposed schedule.",
+    },
+    {
+      id: "mail", title: "Email + calendar", art: "mailCal", hue: "cyan", col: 3, row: 0,
+      purpose: "Gets the schedule to people where they already look.",
+      how: "The platform is integrated with Google Calendar, and email goes out through SendGrid.",
+      tech: ["Google Calendar", "SendGrid"],
+    },
+    {
+      id: "records", title: "Records", art: "records", hue: "mint", col: 2, row: 1, step: 3,
+      purpose: "Paperwork handled in the same place as the schedule.",
+      how: "Claude helps draft documents, and files are stored with the organization's records.",
+      tech: ["Claude (documents)", "AWS S3"],
+      output: "Organized training records.",
+    },
+    {
+      id: "faa", title: "FAA data", art: "faa", hue: "peach", col: 3, row: 1,
+      purpose: "Official aviation data the records draw on.",
+      how: "FAA data sources are integrated into the platform.",
+      tech: ["FAA data sources"],
+      output: "Reference data for records.",
+    },
+    {
+      id: "pay", title: "Payments", art: "connect", hue: "coral", col: 2, row: 2,
+      purpose: "Takes payments on behalf of each school.",
+      how: "Payments are handled per organization through Stripe Connect.",
+      tech: ["Stripe Connect"],
+    },
+  ],
+  links: [
+    ["schools", "platform"],
+    ["platform", "ai"],
+    ["ai", "mail"],
+    ["platform", "records"],
+    ["faa", "records"],
+    ["platform", "pay"],
+  ],
+  steps: [
+    { title: "Flight schools", text: "Several training organizations run their day-to-day on one platform." },
+    { title: "Schedule fills itself", text: "Claude helps build the training schedule and draft documents." },
+    { title: "Paperwork handled", text: "Records, FAA data, email, calendars and Stripe Connect payments sit in the same place." },
+  ],
+};
+
+const resultTech = ["Hugging Face", "Open-source LLMs"];
+const wordley: Workflow = {
+  slug: "wordley",
+  label: "You paste text, AI reads it once, and five results come back: sentiment, tone, emotion, a summary and the names in it.",
+  cols: 5,
+  rows: 2,
+  nodes: [
+    {
+      id: "text", title: "Your text", art: "paste", hue: "neutral", col: 1, row: 0, step: 1,
+      purpose: "Any text you want to understand: an email, a review, an article.",
+      how: "Paste it into the app.",
+      tech: ["React"],
+      output: "Text for analysis.",
+    },
+    {
+      id: "ai", title: "AI reads it", art: "lens", hue: "lavender", col: 2, row: 0, step: 2,
+      purpose: "Runs five analyses in one go instead of one by one.",
+      how: "A backend runs Hugging Face and open-source models over the text.",
+      tech: ["FastAPI", ...resultTech],
+      output: "Five readings of the same text.",
+    },
+    {
+      id: "sentiment", title: "Sentiment", art: "gauge", hue: "mint", col: 0, row: 1,
+      purpose: "Is the text positive, negative or neutral?",
+      how: "A model scores the overall sentiment.",
+      tech: resultTech,
+    },
+    {
+      id: "tone", title: "Tone", art: "tone", hue: "blue", col: 1, row: 1,
+      purpose: "How does it sound: formal, friendly, urgent?",
+      how: "A model reads the tone of voice.",
+      tech: resultTech,
+    },
+    {
+      id: "emotion", title: "Emotion", art: "emotion", hue: "coral", col: 2, row: 1,
+      purpose: "Which feelings come through.",
+      how: "A model detects the emotions expressed.",
+      tech: resultTech,
+    },
+    {
+      id: "summary", title: "Summary", art: "summary", hue: "lavender", col: 3, row: 1, step: 3,
+      purpose: "The gist in a few lines.",
+      how: "A model writes a short summary.",
+      tech: resultTech,
+    },
+    {
+      id: "names", title: "Names", art: "entities", hue: "peach", col: 4, row: 1,
+      purpose: "The people, places and organizations mentioned.",
+      how: "A model picks out named entities.",
+      tech: resultTech,
+    },
+  ],
+  links: [
+    ["text", "ai"],
+    ["ai", "sentiment", "ymid"],
+    ["ai", "tone", "ymid"],
+    ["ai", "emotion"],
+    ["ai", "summary", "ymid"],
+    ["ai", "names", "ymid"],
+  ],
+  steps: [
+    { title: "Paste any text", text: "An email, a review, an article: drop it in." },
+    { title: "AI reads it", text: "It works out sentiment, tone and emotion, and picks out names and key entities." },
+    { title: "Clear results", text: "A short summary and readings at a glance. 120+ people used it in its first month." },
+  ],
+};
+
+const recaller: Workflow = {
+  slug: "recaller",
+  label: "Your documents become a searchable index. When you ask a question, AI finds the closest passages and answers from them, or sums the document up.",
+  cols: 4,
+  rows: 2,
+  nodes: [
+    {
+      id: "docs", title: "Your documents", art: "upload", hue: "blue", col: 0, row: 0, step: 1,
+      purpose: "Add your files once. They become a knowledge base you can talk to.",
+      how: "Documents are uploaded through the app to the backend.",
+      tech: ["React", "Flask"],
+      output: "Document text to index.",
+    },
+    {
+      id: "index", title: "Searchable index", art: "vectors", hue: "lavender", col: 1, row: 0,
+      purpose: "Stores what each passage means, not just its words.",
+      how: "Each passage is turned into a vector embedding.",
+      tech: ["Vector embeddings"],
+      output: "Passages searchable by meaning.",
+    },
+    {
+      id: "question", title: "Your question", art: "question", hue: "mint", col: 1, row: 1, step: 2,
+      purpose: "Ask the way you would ask a colleague.",
+      how: "Type a question in plain words.",
+      tech: ["React"],
+      output: "A question to look up.",
+    },
+    {
+      id: "lookup", title: "AI looks it up", art: "search", hue: "cyan", col: 2, row: 0.5,
+      purpose: "Finds the passages closest to your question.",
+      how: "The question is compared against the index by similarity, and the best matches are kept.",
+      tech: ["Similarity search", "Flask"],
+      output: "The most relevant passages.",
+    },
+    {
+      id: "answer", title: "Answer", art: "answer", hue: "peach", col: 3, row: 0, step: 3,
+      purpose: "An answer drawn from your own documents.",
+      how: "DeepSeek answers from the retrieved passages.",
+      tech: ["DeepSeek"],
+    },
+    {
+      id: "summary", title: "Summary", art: "digest", hue: "coral", col: 3, row: 1,
+      purpose: "The whole document, condensed.",
+      how: "DeepSeek summarizes the document.",
+      tech: ["DeepSeek"],
+    },
+  ],
+  links: [
+    ["docs", "index"],
+    ["index", "lookup"],
+    ["question", "lookup"],
+    ["lookup", "answer"],
+    ["lookup", "summary"],
+  ],
+  steps: [
+    { title: "Upload documents", text: "Add your files once. They become a knowledge base you can talk to." },
+    { title: "Ask in plain words", text: "Type a question the way you would ask a colleague." },
+    { title: "Get the answer", text: "It finds the right passage and answers with context, or sums the document up." },
+  ],
+};
+
+const safelinks: Workflow = {
+  slug: "safelinks",
+  label: "You create a private, token-protected link with a timer. Visitors with the token get in until the time runs out, then the link expires by itself.",
+  cols: 5,
+  rows: 2,
+  nodes: [
+    {
+      id: "you", title: "You", art: "sharer", hue: "peach", col: 0, row: 0,
+      purpose: "You have a file or page to share for a limited time.",
+      how: "Request a link from the web app.",
+      tech: ["Web app"],
+      output: "A request for a link.",
+    },
+    {
+      id: "maker", title: "Link maker", art: "forge", hue: "lavender", col: 1, row: 0, step: 1,
+      purpose: "Creates a private link, protected by a token.",
+      how: "A small service issues each link with its own access token.",
+      tech: ["Node.js + Express", "Token-based access"],
+      output: "A new link and its token.",
+    },
+    {
+      id: "timer", title: "Timer", art: "timer", hue: "cyan", col: 2, row: 0, step: 2,
+      purpose: "Decides how long the link stays open.",
+      how: "Each link is stored with when it should expire.",
+      tech: ["Redis", "Firestore"],
+      output: "A link with an expiry.",
+    },
+    {
+      id: "link", title: "Private link", art: "link", hue: "blue", col: 3, row: 0,
+      purpose: "The link you hand out.",
+      how: "It only opens for someone holding the right token.",
+      tech: ["Token-based access"],
+      output: "A shareable URL.",
+    },
+    {
+      id: "check", title: "Token check", art: "keyhole", hue: "mint", col: 4, row: 0,
+      purpose: "Lets the right people in, and only while the link is live.",
+      how: "Every visit is checked for a valid token before anything is served.",
+      tech: ["Node.js + Express"],
+      output: "Access, or a refusal.",
+    },
+    {
+      id: "visitor", title: "Visitor", art: "visitor", hue: "peach", col: 4, row: 1,
+      purpose: "The person you shared with.",
+      how: "Opens the link and gets the content.",
+      tech: [],
+    },
+    {
+      id: "expired", title: "It expires itself", art: "expired", hue: "coral", col: 3, row: 1, step: 3,
+      purpose: "When time runs out the link stops working.",
+      how: "Expiry is automatic, so nobody has to remember to revoke it. The service runs in a container on Cloud Run.",
+      tech: ["Automatic expiry", "Docker", "Google Cloud Run"],
+      output: "A dead link.",
+    },
+  ],
+  links: [
+    ["you", "maker"],
+    ["maker", "timer"],
+    ["timer", "link"],
+    ["link", "check"],
+    ["check", "visitor"],
+    ["link", "expired"],
+  ],
+  steps: [
+    { title: "Share a link", text: "Create a private link to a file or page, protected by a token." },
+    { title: "Set a timer", text: "Decide how long the link should stay open." },
+    { title: "It expires itself", text: "When time runs out the link stops working. Nobody has to remember to revoke it." },
+  ],
+};
+
+const respoon: Workflow = {
+  slug: "respoon",
+  label: "A neighbour posts spare food, people nearby find it on a map, chat to arrange a pickup, and the meal is saved from waste.",
+  cols: 6,
+  rows: 1,
+  nodes: [
+    {
+      id: "giver", title: "Has spare food", art: "giver", hue: "peach", col: 0, row: 0,
+      purpose: "Someone with food they want to share.",
+      how: "They post it from the app.",
+      tech: ["React"],
+      output: "A food post.",
+    },
+    {
+      id: "listing", title: "Food listing", art: "listing", hue: "coral", col: 1, row: 0,
+      purpose: "Puts the food on record, with where it is.",
+      how: "The post is saved with its location.",
+      tech: ["Flask API", "PostgreSQL"],
+      output: "A listing that can be found nearby.",
+    },
+    {
+      id: "map", title: "Nearby map", art: "map", hue: "mint", col: 2, row: 0, step: 1,
+      purpose: "Shows what is shared close to you.",
+      how: "Discovery is based on your location, with filters and pages of results.",
+      tech: ["Geolocation discovery", "Filters + pagination"],
+      output: "Food you could pick up.",
+    },
+    {
+      id: "chat", title: "Chat", art: "chat", hue: "blue", col: 3, row: 0, step: 2,
+      purpose: "Agree on a pickup.",
+      how: "Message in real time.",
+      tech: ["Socket.IO"],
+      output: "A time and place.",
+    },
+    {
+      id: "pickup", title: "Picks it up", art: "pickup", hue: "cyan", col: 4, row: 0,
+      purpose: "The neighbour collects the food.",
+      how: "They meet at the agreed place.",
+      tech: [],
+      output: "Food in hand.",
+    },
+    {
+      id: "meal", title: "Meal saved", art: "meal", hue: "lavender", col: 5, row: 0, step: 3,
+      purpose: "The food goes to someone nearby instead of going to waste.",
+      how: "Shared, eaten, not thrown away.",
+      tech: [],
+    },
+  ],
+  links: [
+    ["giver", "listing"],
+    ["listing", "map"],
+    ["map", "chat"],
+    ["chat", "pickup"],
+    ["pickup", "meal"],
+  ],
+  steps: [
+    { title: "Find food nearby", text: "Neighbours share spare food, and a map shows what is close to you." },
+    { title: "Chat to arrange", text: "Message in real time to agree on a pickup." },
+    { title: "Share the meal", text: "The food goes to someone nearby instead of going to waste." },
+  ],
+};
+
+export const workflows: Record<string, Workflow> = Object.fromEntries(
+  [folklore, outersuite, voyajur, vynsite, hiloAtos, wordley, recaller, safelinks, respoon].map((w) => [w.slug, w]),
+);
