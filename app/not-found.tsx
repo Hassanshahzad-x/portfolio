@@ -3,10 +3,14 @@ import Link from "next/link";
 export default function NotFound() {
   return (
     <section className="shell section-y">
-      <p className="meta">404</p>
-      <h1 className="mt-6 max-w-[14ch] text-h2 font-semibold">This page isn&apos;t here.</h1>
-      <Link href="/" className="press mt-10 inline-flex bg-fg px-5 py-3 font-medium text-bg">
-        Back to the homepage
+      <p className="kicker">
+        ¶ <b>404</b> · off the trace
+      </p>
+      <h1 className="mt-6 max-w-[14ch] font-display text-display font-[430]">
+        This page <em>isn&apos;t here.</em>
+      </h1>
+      <Link href="/" className="press mt-10 inline-flex rounded-full bg-fg px-6 py-3 font-medium text-bg hover:bg-accent-ink">
+        Back to the start
       </Link>
     </section>
   );

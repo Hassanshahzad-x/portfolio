@@ -11,7 +11,12 @@ export const metadata: Metadata = {
 export default function Work() {
   return (
     <div className="shell pt-10 pb-24 md:pt-16 md:pb-32">
-      <h1 className="enter text-display font-semibold">Projects</h1>
+      <p className="kicker">
+        ¶ <b>index</b> · every project, each with a case file
+      </p>
+      <h1 className="enter mt-5 font-display text-display font-[430]">
+        Projects<span className="text-accent">.</span>
+      </h1>
       <p className="enter mt-4 max-w-[46ch] text-lead text-fg-2" style={{ "--i": 1 } as React.CSSProperties}>
         Everything I have built, from client platforms to personal projects. Each one has a case study.
       </p>

@@ -8,12 +8,23 @@ const links = [
   { label: "Résumé (PDF)", href: site.links.resume, external: false },
 ];
 
-export function Contact() {
+// Always a black band, in both themes. The footer continues the band below it.
+export function Contact({ stop }: { stop: number }) {
   return (
-    <section id="contact" aria-labelledby="contact-title" className="section-y snap-start border-t border-line">
-      <div className="shell">
-        <h2 id="contact-title" className="reveal max-w-[12ch] text-display font-semibold">
-          Have something worth building?
+    <section
+      id="contact"
+      aria-labelledby="contact-title"
+      data-stop={stop}
+      data-label="next step"
+      className="band relative pt-(--section) pb-16"
+    >
+      <div className="shell relative">
+        <p className="kicker">
+          <span aria-hidden className="station" />¶ <b>{stop}</b> · next step
+        </p>
+        <h2 id="contact-title" className="reveal mt-8 max-w-[14ch] font-display text-display font-[430]">
+          Have something <em>worth building?</em>
+          <span aria-hidden className="caret ml-3 h-[0.8em] w-[0.42em] align-[-0.06em] text-accent" />
         </h2>
         <p className="reveal mt-8 max-w-[44ch] text-lead text-fg-2">
           I&apos;m happy to talk about product engineering, AI features or a system that needs an owner. Email is the
@@ -23,7 +34,7 @@ export function Contact() {
         <div className="reveal mt-12 flex flex-col gap-6 md:flex-row md:items-center md:gap-8">
           <a
             href={`mailto:${site.email}`}
-            className="link-draw self-start text-[clamp(1.125rem,0.7rem+2.2vw,2.25rem)] font-medium tracking-[-0.03em] break-all"
+            className="link-draw self-start font-display text-[clamp(1.25rem,0.7rem+2.4vw,2.5rem)] tracking-[-0.01em] break-all"
           >
             {site.email}
           </a>

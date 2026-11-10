@@ -1,88 +1,49 @@
-import Link from "next/link";
 import { allProjects, type Project } from "@/lib/content";
-import { ProjectFrame } from "./project-frame";
+import { ProjectFigure } from "@/components/figures";
+import { Kicker, Thread } from "@/components/trace/thread";
 import { CaseButton, LiveLink } from "./project-list";
-import { SystemDiagram } from "./system-diagram";
 
-const pad = (n: number) => String(n).padStart(2, "0");
+// Homepage stops 03 to 11: one project each, the pitch on top and its full-width "how it works" figure below.
+export const FIRST_STOP = 3;
 
-function Metrics({ items }: { items: Project["metrics"] }) {
+function Stop({ project: p, index, total }: { project: Project; index: number; total: number }) {
+  const n = FIRST_STOP + index;
   return (
-    <dl className="grid grid-cols-2 gap-x-6 gap-y-6">
-      {items.map((m) => (
-        <div key={m.label} className="flex flex-col border-t border-line pt-3">
-          <dt className="meta order-2 mt-2">{m.label}</dt>
-          {/* Word values ("Multi-tenant") get a smaller size so they never break mid-word. */}
-          <dd
-            className={`-order-1 font-mono leading-none tracking-[-0.04em] whitespace-nowrap tabular-nums ${m.value.length > 7 ? "text-[clamp(1.25rem,1rem+0.6vw,1.625rem)]" : "text-[clamp(1.5rem,1.1rem+1.4vw,2.5rem)]"}`}
-          >
-            {m.value}
-          </dd>
-        </div>
-      ))}
-    </dl>
-  );
-}
-
-// Projects without a screenshot show their system design in the same frame.
-function SystemFrame({ project }: { project: Project }) {
-  return (
-    <figure className="border border-line bg-surface">
-      <figcaption className="meta flex h-8 items-center border-b border-line px-3">{project.name}: system design</figcaption>
-      <div className="flex p-4 sm:aspect-[16/10] sm:items-center sm:p-6">
-        <div className="w-full">
-          <SystemDiagram project={project} compact />
-        </div>
-      </div>
-    </figure>
-  );
-}
-
-// One project per screen. Scroll snapping (globals.css) moves a whole slide per scroll.
-function Slide({ project: p, index, total }: { project: Project; index: number; total: number }) {
-  const flip = index % 2 === 1;
-  return (
-    <article
-      aria-labelledby={`p-${p.slug}`}
-      className="snap-start border-t border-line py-14 lg:flex lg:min-h-[calc(100dvh-var(--nav-h))] lg:items-center lg:py-10"
-    >
-      <div className="shell grid gap-10 lg:grid-cols-12 lg:items-center lg:gap-12">
-        <div className={`reveal lg:col-span-7 ${flip ? "lg:order-2" : ""}`}>
-          {p.image ? (
-            <Link href={`/work/${p.slug}`} className="group block" aria-label={`${p.name} case study`}>
-              <ProjectFrame
-                src={p.image}
-                alt={`${p.name} live product screen.`}
-                url={p.url}
-                sizes="(min-width: 1024px) 58vw, 100vw"
-                priority={index === 0}
-              />
-            </Link>
-          ) : (
-            <SystemFrame project={p} />
-          )}
-        </div>
-
-        <div className="reveal lg:col-span-5">
-          <p className="meta flex items-center gap-3">
-            <span className="text-accent-ink tabular-nums">
-              {pad(index + 1)} / {pad(total)}
-            </span>
-            <span aria-hidden className="h-px w-6 bg-line-strong" />
-            {p.context}
-          </p>
-          <h3 id={`p-${p.slug}`} className="mt-4 text-h3 font-semibold">
-            {p.name}
-            <span className="block text-fg-3">{p.kind}</span>
-          </h3>
-          <p className="mt-5 max-w-[46ch] text-fg-2">{p.summary}</p>
-          <div className="mt-8">
-            {p.metrics.length > 0 ? <Metrics items={p.metrics} /> : <p className="meta border-t border-line pt-3">{p.stack.join(", ")}</p>}
+    <article aria-labelledby={`p-${p.slug}`} data-stop={n} data-label={p.name.toLowerCase()} className="relative py-16 lg:py-24">
+      <Thread />
+      <div className="shell relative">
+        <Kicker n={n} label={`project ${index + 1} of ${total}`} extra={p.context} />
+        <div className="reveal mt-8 grid gap-10 lg:grid-cols-12 lg:gap-14">
+          <div className="lg:col-span-5">
+            <h3 id={`p-${p.slug}`} className="font-display text-h2 font-[430]">
+              {p.name}
+              <span className="text-accent">.</span>
+            </h3>
+            <p className="mt-3 font-display text-[1.25rem] text-fg-2 italic">{p.kind}</p>
+            <div className="mt-8 flex flex-wrap items-center gap-4">
+              <CaseButton project={p} />
+              {p.url && <LiveLink url={p.url} name={p.name} />}
+            </div>
           </div>
-          <div className="mt-8 flex flex-wrap items-center gap-3">
-            <CaseButton project={p} />
-            {p.url && <LiveLink url={p.url} name={p.name} />}
+
+          <div className="lg:col-span-7">
+            <p className="max-w-[56ch] text-lead text-fg-2">{p.summary}</p>
+            {p.metrics.length > 0 ? (
+              <dl className="mt-8 grid gap-x-8 border-t border-line sm:grid-cols-2">
+                {p.metrics.map((m) => (
+                  <div key={m.label} className="grid grid-cols-[minmax(5.5rem,auto)_1fr] items-baseline gap-4 border-b border-line py-3">
+                    <dd className="font-display text-[1.5rem] leading-none text-accent-ink tabular-nums">{m.value}</dd>
+                    <dt className="text-[0.875rem] text-fg-2">{m.label}</dt>
+                  </div>
+                ))}
+              </dl>
+            ) : null}
+            <p className="mt-6 font-mono text-[0.75rem] text-fg-3">{p.stack.join(" · ")}</p>
           </div>
+        </div>
+
+        <div className="reveal mt-12">
+          <ProjectFigure slug={p.slug} n={n} />
         </div>
       </div>
     </article>
@@ -96,7 +57,7 @@ export function SelectedWork() {
         Products I architected and shipped
       </h2>
       {allProjects.map((p, i) => (
-        <Slide key={p.slug} project={p} index={i} total={allProjects.length} />
+        <Stop key={p.slug} project={p} index={i} total={allProjects.length} />
       ))}
     </section>
   );

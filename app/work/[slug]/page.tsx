@@ -5,6 +5,8 @@ import { ArrowLeft, ArrowRight, ArrowUpRight } from "@phosphor-icons/react/ssr";
 import { allProjects as projects } from "@/lib/content";
 import { ProjectFrame } from "@/components/projects/project-frame";
 import { SystemDiagram } from "@/components/projects/system-diagram";
+import { FIRST_STOP } from "@/components/projects/selected-work";
+import { ProjectFigure } from "@/components/figures";
 
 // Only listed projects have case studies; anything else is a real 404.
 export const dynamicParams = false;
@@ -29,7 +31,10 @@ export async function generateMetadata({ params }: PageProps<"/work/[slug]">): P
 function Block({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="reveal grid gap-6 border-t border-line py-14 md:py-20 lg:grid-cols-12 lg:gap-10">
-      <h2 className="text-h3 font-semibold lg:col-span-4">{title}</h2>
+      <h2 className="font-display text-h3 font-[430] lg:col-span-4">
+        {title}
+        <span className="text-accent">.</span>
+      </h2>
       <div className="lg:col-span-8">{children}</div>
     </section>
   );
@@ -41,6 +46,7 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
   if (index === -1) notFound();
   const p = projects[index];
   const next = projects[(index + 1) % projects.length];
+  const n = FIRST_STOP + index;
 
   return (
     <article className="shell">
@@ -49,10 +55,14 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
           <ArrowLeft size={13} aria-hidden className="transition-transform group-hover:-translate-x-0.5" />
           All projects
         </Link>
-        <h1 className="enter mt-10 text-display font-semibold" style={{ "--i": 1 } as React.CSSProperties}>
+        <p className="kicker mt-10">
+          case file · <b>{String(n).padStart(2, "0")}</b> · {p.context}
+        </p>
+        <h1 className="enter mt-5 font-display text-display font-[430]" style={{ "--i": 1 } as React.CSSProperties}>
           {p.name}
+          <span className="text-accent">.</span>
         </h1>
-        <p className="enter mt-4 text-h3 font-medium text-fg-3" style={{ "--i": 2 } as React.CSSProperties}>
+        <p className="enter mt-4 font-display text-h3 text-fg-2 italic" style={{ "--i": 2 } as React.CSSProperties}>
           {p.kind}
         </p>
         <dl className="enter mt-12 grid gap-6 sm:grid-cols-3" style={{ "--i": 3 } as React.CSSProperties}>
@@ -81,14 +91,22 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
         </dl>
       </header>
 
-      {p.image && (
-        <div className="enter" style={{ "--i": 4 } as React.CSSProperties}>
-          <ProjectFrame src={p.image} alt={`${p.name} live product screen.`} url={p.url} sizes="(min-width: 1360px) 1300px, 100vw" priority />
+      <div className="enter grid gap-10 lg:grid-cols-12" style={{ "--i": 4 } as React.CSSProperties}>
+        <div className="lg:col-span-12">
+          <ProjectFigure slug={p.slug} n={n} />
         </div>
-      )}
+        {p.image && (
+          <figure className="lg:col-span-10 lg:col-start-2">
+            <ProjectFrame src={p.image} alt={`${p.name} live product screen.`} url={p.url} sizes="(min-width: 1024px) 80vw, 100vw" priority />
+            <figcaption className="kicker mt-4">
+              fig. <b>{String(n).padStart(2, "0")}b</b> · the live product
+            </figcaption>
+          </figure>
+        )}
+      </div>
 
-      <section aria-label="Overview" className={`reveal pb-16 md:pb-24 ${p.image ? "pt-16 md:pt-24" : "border-t border-line pt-14 md:pt-20"}`}>
-        <p className="max-w-[40ch] text-[clamp(1.5rem,1.1rem+1.6vw,2.5rem)] leading-[1.2] font-medium tracking-[-0.03em]">
+      <section aria-label="Overview" className="reveal pt-16 pb-16 md:pt-24 md:pb-24">
+        <p className="max-w-[40ch] font-display text-[clamp(1.5rem,1.1rem+1.6vw,2.5rem)] leading-[1.2] tracking-[-0.01em]">
           {p.summary}
         </p>
         {p.metrics.length > 0 && (
@@ -96,7 +114,7 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
           {p.metrics.map((m) => (
             <div key={m.label} className="flex flex-col border-t border-line pt-4">
               <dt className="meta order-2 mt-3">{m.label}</dt>
-              <dd className="-order-1 font-mono text-[clamp(1.5rem,1.1rem+1.6vw,2.5rem)] leading-none tracking-[-0.04em] tabular-nums">
+              <dd className="-order-1 font-display text-[clamp(1.75rem,1.2rem+1.8vw,2.75rem)] leading-none text-accent-ink tabular-nums">
                 {m.value}
               </dd>
             </div>
@@ -117,7 +135,7 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
         <ul className="space-y-4">
           {p.contribution.map((c) => (
             <li key={c} className="grid max-w-[64ch] grid-cols-[14px_1fr] gap-4">
-              <span aria-hidden className="mt-[0.8em] h-px w-3.5 bg-accent" />
+              <span aria-hidden className="mt-[0.6em] size-1.5 rounded-full bg-accent" />
               {c}
             </li>
           ))}
@@ -126,12 +144,12 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
 
       <section aria-labelledby="system-title" className="reveal border-t border-line py-14 md:py-20">
         <div className="flex flex-wrap items-baseline justify-between gap-4">
-          <h2 id="system-title" className="text-h3 font-semibold">
-            System design
+          <h2 id="system-title" className="font-display text-h3 font-[430]">
+            System design<span className="text-accent">.</span>
           </h2>
           <p className="meta">Snapshot, client to external systems</p>
         </div>
-        <figure className="mt-10 border border-line bg-surface p-5 md:p-8">
+        <figure className="plate mt-10 p-5 md:p-8">
           <SystemDiagram project={p} />
           {p.systemNote && <figcaption className="meta mt-6 border-t border-line pt-4">{p.systemNote}</figcaption>}
         </figure>
@@ -143,7 +161,7 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
         <div className="grid gap-x-10 gap-y-12 md:grid-cols-2">
           {p.challenges.map((c) => (
             <div key={c.title}>
-              <h3 className="text-lg font-semibold tracking-tight">{c.title}</h3>
+              <h3 className="font-display text-xl font-medium">{c.title}</h3>
               <p className="mt-3 text-fg-2">{c.body}</p>
             </div>
           ))}
@@ -163,11 +181,12 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
 
       <nav aria-label="Next project" className="border-t border-line py-16 md:py-24">
         <Link href={`/work/${next.slug}`} className="group block">
-          <span className="meta">Next project</span>
+          <span className="kicker">next on the trace →</span>
           <span className="mt-4 flex items-center justify-between gap-6">
-            <span className="text-h2 font-semibold">
+            <span className="font-display text-h2 font-[430]">
               {next.name}
-              <span className="block text-fg-3 transition-colors duration-(--dur-med) group-hover:text-fg-2">{next.kind}</span>
+              <span className="text-accent">.</span>
+              <span className="block font-display text-h3 text-fg-3 italic transition-colors duration-(--dur-med) group-hover:text-fg-2">{next.kind}</span>
             </span>
             <ArrowRight
               size={40}

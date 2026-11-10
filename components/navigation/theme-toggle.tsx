@@ -5,7 +5,7 @@ import { Moon, Sun } from "@phosphor-icons/react";
 // No React state: the theme lives on <html data-theme>, and CSS picks the icon.
 function toggle() {
   const root = document.documentElement;
-  const current = root.dataset.theme ?? (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  const current = root.dataset.theme ?? "dark";
   const next = current === "dark" ? "light" : "dark";
   root.dataset.theme = next;
   try {
