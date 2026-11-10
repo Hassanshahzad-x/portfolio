@@ -623,81 +623,12 @@ p {
   transition: opacity var(--dur-med) ease;
 }
 
-/* Tooltip: hover (on devices that hover) or keyboard focus. */
-.wf-tip {
-  position: absolute;
-  z-index: 10;
-  top: calc(100% + 10px);
-  left: 0;
-  width: min(18rem, 86vw);
-  padding: 0.875rem 1rem;
-  text-align: left;
-  font-size: 0.8125rem;
-  line-height: 1.5;
-  color: var(--fg-2);
-  background: light-dark(#fffdf9, #161616);
-  border: 1px solid color-mix(in oklab, var(--ink) 22%, var(--line));
-  border-radius: 12px;
-  box-shadow: 0 18px 40px -18px light-dark(rgb(28 25 23 / 0.28), rgb(0 0 0 / 0.9));
-  opacity: 0;
-  visibility: hidden;
-  translate: 0 4px;
-  pointer-events: none;
-  transition:
-    opacity var(--dur-fast) ease,
-    translate var(--dur-fast) var(--ease-out),
-    visibility 0s linear var(--dur-fast);
-}
-@container (width >= 48rem) {
-  .wf-tip[data-y="above"] {
-    top: auto;
-    bottom: calc(100% + 10px);
-    translate: 0 -4px;
-  }
-  .wf-tip[data-x="center"] {
-    left: 50%;
-    margin-left: calc(min(18rem, 86vw) / -2);
-  }
-  .wf-tip[data-x="end"] {
-    left: auto;
-    right: 0;
-  }
-}
-.wf-node:has(> .wf-card:focus-visible) .wf-tip {
-  opacity: 1;
-  visibility: visible;
-  translate: 0 0;
-  transition-delay: 0s;
-}
-@media (hover: hover) {
-  .wf-node:has(> .wf-card:hover) .wf-tip {
-    opacity: 1;
-    visibility: visible;
-    translate: 0 0;
-    transition-delay: 0s;
-  }
-}
-.wf-node:has(:popover-open) .wf-tip {
-  display: none;
-}
-.wf-tip-lead {
-  font-weight: 600;
-  color: var(--fg);
-}
-.wf-tip-hint {
-  margin-top: 0.5rem;
-  font: 0.6875rem var(--font-mono);
-  color: var(--fg-3);
-}
-
-/* Shared field list for tooltip and panel. */
-.wf-tip dl,
+/* Field list in the details panel. */
 .wf-panel dl {
   display: grid;
   gap: 0.25rem;
   margin-top: 0.5rem;
 }
-.wf-tip dt,
 .wf-panel dt {
   margin-top: 0.375rem;
   font: 0.6875rem var(--font-mono);
@@ -802,13 +733,6 @@ p {
   color: var(--fg);
   background: var(--tint);
 }
-.wf-flowline {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.375rem;
-  align-items: baseline;
-}
-
 /* Motion: only while a node is hovered, focused or open, and only when motion is welcome. */
 @keyframes wf-dash {
   to {

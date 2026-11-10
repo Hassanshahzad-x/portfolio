@@ -13,7 +13,8 @@ export type WorkflowNode = {
   // Cell on the desktop grid, 0-based. Below the breakpoint nodes stack in array order instead.
   col: number;
   row: number;
-  purpose: string;
+  // What arrives at this stage.
+  input: string;
   how: string;
   // Only what runs at this stage, never the whole project stack. Empty when nothing can be named with confidence.
   tech: string[];

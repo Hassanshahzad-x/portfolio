@@ -1,9 +1,9 @@
 import { NodeIllustration } from "./art";
 import type { Hue, Turn, Workflow, WorkflowNode as Node } from "./types";
 
-// A project's workflow as cards joined by arrows. Server-rendered and JS-free: hover and focus show a tooltip
-// (CSS), a click opens a native popover with the full details (light dismiss, Esc and focus return built in),
-// and :has() rules light up the active node's connectors. Styles live under "workflow" in app/globals.css.
+// A project's workflow as cards joined by arrows. Server-rendered and JS-free: a click or tap opens a native
+// popover with the node's details (light dismiss, Esc and focus return built in), and :has() rules light up
+// the active node's connectors. Styles live under "workflow" in app/globals.css.
 //
 // Desktop: nodes sit on a cols x rows grid of W x H cells; the connector SVG shares that coordinate space and
 // scales with the box. Below the container breakpoint the same nodes stack in data order and the SVG hides.
@@ -74,7 +74,6 @@ export function WorkflowDiagram({ wf }: { wf: Workflow }) {
   const pid = (n: string) => `${id}-p-${n}`;
   const by = Object.fromEntries(wf.nodes.map((n) => [n.id, n]));
   const titles = (ids: string[]) => ids.map((i) => by[i].title);
-  const into = (n: string) => titles(wf.links.filter((l) => l[1] === n).map((l) => l[0]));
   const outOf = (n: string) => titles(wf.links.filter((l) => l[0] === n).map((l) => l[1]));
 
   // While a node is hovered, focused or open, its connectors light up and carry a moving dash.
@@ -110,8 +109,7 @@ export function WorkflowDiagram({ wf }: { wf: Workflow }) {
             key={n.id}
             n={n}
             wf={wf}
-            ids={{ node: nid(n.id), panel: pid(n.id), tip: `${id}-t-${n.id}` }}
-            from={into(n.id)}
+            ids={{ node: nid(n.id), panel: pid(n.id) }}
             to={outOf(n.id)}
           />
         ))}
@@ -124,18 +122,13 @@ function WorkflowNode({
   n,
   wf,
   ids,
-  from,
   to,
 }: {
   n: Node;
   wf: Workflow;
-  ids: { node: string; panel: string; tip: string };
-  from: string[];
+  ids: { node: string; panel: string };
   to: string[];
 }) {
-  // Tooltip opens away from the nearest edge so it never leaves the board.
-  const tipY = n.row + 0.5 > wf.rows / 2 ? "above" : "below";
-  const tipX = n.col === 0 ? "start" : n.col === wf.cols - 1 ? "end" : "center";
   return (
     <div
       className="wf-node"
@@ -153,7 +146,6 @@ function WorkflowNode({
         id={ids.node}
         className="wf-card"
         popoverTarget={ids.panel}
-        aria-describedby={ids.tip}
         aria-haspopup="dialog"
       >
         <span className="wf-well">
@@ -173,8 +165,7 @@ function WorkflowNode({
           </span>
         )}
       </button>
-      <NodeTooltip n={n} id={ids.tip} y={tipY} x={tipX} />
-      <NodePanel n={n} id={ids.panel} from={from} to={to} />
+      <NodePanel n={n} id={ids.panel} />
     </div>
   );
 }
@@ -189,34 +180,7 @@ function Tech({ items }: { items: string[] }) {
   );
 }
 
-function NodeTooltip({ n, id, x, y }: { n: Node; id: string; x: string; y: string }) {
-  return (
-    <div role="tooltip" id={id} className="wf-tip" data-x={x} data-y={y}>
-      <p className="wf-tip-lead">{n.purpose}</p>
-      <dl>
-        <dt>How it works</dt>
-        <dd>{n.how}</dd>
-        {n.tech.length > 0 && (
-          <>
-            <dt>Technology</dt>
-            <dd>
-              <Tech items={n.tech} />
-            </dd>
-          </>
-        )}
-        {n.output && (
-          <>
-            <dt>Output</dt>
-            <dd>{n.output}</dd>
-          </>
-        )}
-      </dl>
-      <p className="wf-tip-hint">Click for details</p>
-    </div>
-  );
-}
-
-function NodePanel({ n, id, from, to }: { n: Node; id: string; from: string[]; to: string[] }) {
+function NodePanel({ n, id }: { n: Node; id: string }) {
   return (
     <div popover="auto" id={id} className="wf-panel" role="dialog" aria-labelledby={`${id}-h`}>
       <div className="wf-panel-head">
@@ -232,8 +196,8 @@ function NodePanel({ n, id, from, to }: { n: Node; id: string; from: string[]; t
         </button>
       </div>
       <dl>
-        <dt>Purpose</dt>
-        <dd>{n.purpose}</dd>
+        <dt>Input</dt>
+        <dd>{n.input}</dd>
         <dt>How it works</dt>
         <dd>{n.how}</dd>
         {n.tech.length > 0 && (
@@ -250,12 +214,6 @@ function NodePanel({ n, id, from, to }: { n: Node; id: string; from: string[]; t
             <dd>{n.output}</dd>
           </>
         )}
-        <dt>In the flow</dt>
-        <dd className="wf-flowline">
-          <span>{from.length ? `Comes from ${from.join(", ")}` : "Where it starts"}</span>
-          <span aria-hidden>→</span>
-          <span>{to.length ? `Leads to ${to.join(", ")}` : "Where it ends"}</span>
-        </dd>
       </dl>
     </div>
   );

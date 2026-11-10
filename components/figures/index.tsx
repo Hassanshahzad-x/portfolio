@@ -11,7 +11,7 @@ export function ProjectFigure({ slug, n }: { slug: string; n: number }) {
         <span>
           fig. <b className="font-medium text-accent-ink">{String(n).padStart(2, "0")}</b> · how it works
         </span>
-        <span aria-hidden>hover or tap a stage for details</span>
+        <span aria-hidden>tap a stage for details</span>
       </figcaption>
       <div className="px-4 py-6 sm:px-6 sm:py-8">
         <WorkflowDiagram wf={wf} />
